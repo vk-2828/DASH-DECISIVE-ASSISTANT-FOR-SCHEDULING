@@ -1,0 +1,113 @@
+### ---------------------------
+### AUTHENTICATION WORKFLOW
+### ---------------------------
+# This section tests the entire user registration and login process.
+
+### 1. Register a new user
+# This request will create a new user and trigger OTPs to be sent to the email and phone number provided.
+# The response will contain a `userId` which you need for the next step.
+POST http://localhost:4000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Vamshi Krishna",
+  "email": "vamshi.daripelli2005@gmail.com",
+  "phoneNumber": "+918328282308",
+  "password": "123456"
+}
+
+### 2. Verify OTPs to activate the account
+# After registering, paste the `userId` from the response above.
+# Then, check your email and phone for the OTP codes and paste them here.
+POST http://localhost:4000/api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "userId": "68f634c32eecac222ba3fbd6",
+  "emailOtp": 707951,
+  "phoneOtp": 219590
+}
+
+### 3. Login with the verified account
+# This request will log in the user and return a JWT token.
+# The @authToken variable will automatically store the token for use in subsequent requests.
+### @name login
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "email":"vamshi.daripelli2005@gmail.com",
+  "password": "123456"
+}
+
+
+
+### 4. (Optional) Resend OTPs if they expire or were not received
+POST http://localhost:4000/api/auth/resend-otp
+Content-Type: application/json
+
+{
+    "email": "your-actual-email@gmail.com"
+}
+
+
+### ---------------------------
+### TASK MANAGEMENT (Protected Routes)
+### ---------------------------
+# All requests below this line require a valid authentication token.
+
+### 5. Create a new task
+# This will create a task for the logged-in user.
+POST http://localhost:4000/api/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2ODQwNiwiZXhwIjoxNzYzNTYwNDA2fQ.Io5miPuuWcyZgmML7xUx870JcKbxXhidMch2gEmxwVg
+
+{
+  "title": "Lets work on Frontend for DASH ",
+  "description": "Create all React components and connect them to the backend API.",
+  "priority": 95,
+  "dueDate": "2025-11-15T18:00:00.000Z",
+  "isStarred": true,
+  "alarms": ["2025-11-15T09:00:00.000Z"]
+}
+
+### 6. Get all of the user's active tasks
+GET http://localhost:4000/api/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NzQ1MiwiZXhwIjoxNzYzNTU5NDUyfQ.2XFY7UGqFPD9COCppn_6LJPATfuhsAI_KOHJV8KcY3A
+
+
+
+### 7. Get only starred tasks
+GET http://localhost:4000/api/tasks/starred
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NjY4NCwiZXhwIjoxNzYzNTU4Njg0fQ.MVnxiCmJiE9N3bESgo0rNN-AfufES4zGTygmMFoY_Y0
+
+
+
+### 8. Get only completed tasks
+GET http://localhost:4000/api/tasks/completed
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NjY4NCwiZXhwIjoxNzYzNTU4Njg0fQ.MVnxiCmJiE9N3bESgo0rNN-AfufES4zGTygmMFoY_Y0
+
+
+
+### 9. Get only deleted tasks (from the trash)
+GET http://localhost:4000/api/tasks/deleted
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NzExMSwiZXhwIjoxNzYzNTU5MTExfQ.Yr-r_km9ChXqu6ju0stpkRhhdzOVEjIuV29LHvA96gs
+
+
+### 10. Update a task (e.g., mark as completed)
+# IMPORTANT: Replace ':taskId' with an actual task ID from one of the GET requests above.
+PUT http://localhost:4000/api/tasks/68f63b4dfd7e6402dbe5f8b0
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NzQ1MiwiZXhwIjoxNzYzNTU5NDUyfQ.2XFY7UGqFPD9COCppn_6LJPATfuhsAI_KOHJV8KcY3A
+
+{
+  "isCompleted": true,
+  "priority": 75
+}
+
+
+### 11. "Soft" delete a task (move to trash)
+# IMPORTANT: Replace ':taskId' with an actual task ID.
+DELETE http://localhost:4000/api/tasks/:taskId
+Authorization: Bearer {{authToken}}
+

@@ -3,51 +3,38 @@ const {
     createTask,
     getUserTasks,
     updateTask,
-    deleteTask,
+    deleteTask, // This is for soft-deleting a single task
     getStarredTasks,
     getCompletedTasks,
     getDeletedTasks,
+    deleteTasksPermanently // <-- IMPORT THE NEW FUNCTION
 } = require('../controllers/taskController');
 const authMiddleware = require('../middlewares/authMiddleware');
-
 const router = express.Router();
 
-// This line is crucial. It protects all subsequent routes in this file.
-// No user can access these endpoints without a valid JWT token.
+// Apply auth middleware to all task routes
 router.use(authMiddleware);
 
-// --- Primary CRUD Routes ---
-
-// @route   POST /api/tasks
-// @desc    Create a new task for the logged-in user
+// --- Standard CRUD Routes ---
 router.post('/', createTask);
-
-// @route   GET /api/tasks
-// @desc    Get all active tasks for the logged-in user
 router.get('/', getUserTasks);
-
-// @route   PUT /api/tasks/:id
-// @desc    Update a specific task by its ID
 router.put('/:id', updateTask);
+router.delete('/:id', deleteTask); // Soft deletes one task
 
-// @route   DELETE /api/tasks/:id
-// @desc    "Soft delete" a task by its ID (move to trash)
-router.delete('/:id', deleteTask);
+// --- NEW BATCH DELETE ROUTE ---
+// This route will handle permanently deleting multiple tasks
+// We use router.delete on the root '/' path because we're sending the IDs in the request body
+router.delete('/', deleteTasksPermanently); // Permanently deletes a batch of tasks
 
-
-// --- Filtered "GET" Routes ---
-
-// @route   GET /api/tasks/starred
-// @desc    Get only the user's starred tasks
+// --- Filtered GET Routes ---
 router.get('/starred', getStarredTasks);
-
-// @route   GET /api/tasks/completed
-// @desc    Get only the user's completed tasks
 router.get('/completed', getCompletedTasks);
-
-// @route   GET /api/tasks/deleted
-// @desc    Get the user's tasks from the trash
 router.get('/deleted', getDeletedTasks);
 
-
 module.exports = router;
+
+
+
+
+
+

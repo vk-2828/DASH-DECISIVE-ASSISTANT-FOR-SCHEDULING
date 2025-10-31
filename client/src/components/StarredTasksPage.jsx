@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import useTasks from '../hooks/useTasks';
 import TaskList from './TaskList';
-import EditTaskModal from './EditTaskModal'; // Import the Edit modal
+import EditTaskModal from './EditTaskModal';
+import TaskDetailModal from './TaskDetailModal'; // Import the detail modal
 
 const Spinner = () => (
   <div className="flex justify-center items-center py-10">
@@ -10,21 +11,18 @@ const Spinner = () => (
 );
 
 const StarredTasksPage = () => {
+  // We get 'starredTasks', which is the *filtered* version from the provider.
   const { starredTasks, loading, error } = useTasks();
 
-  // --- NEW: Add state management for the Edit Modal ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [taskToView, setTaskToView] = useState(null);
 
-  const handleOpenEditModal = (task) => {
-    setTaskToEdit(task);
-    setIsEditModalOpen(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setTaskToEdit(null);
-    setIsEditModalOpen(false);
-  };
+  const handleOpenEditModal = (task) => { setTaskToEdit(task); setIsEditModalOpen(true); };
+  const handleCloseEditModal = () => { setTaskToEdit(null); setIsEditModalOpen(false); };
+  const handleOpenDetailModal = (task) => { setTaskToView(task); setIsDetailModalOpen(true); };
+  const handleCloseDetailModal = () => { setTaskToView(null); setIsDetailModalOpen(false); };
 
   if (loading) {
     return <Spinner />;
@@ -40,17 +38,33 @@ const StarredTasksPage = () => {
         <h1 className="text-3xl font-bold text-gray-800">Starred Tasks</h1>
       </div>
       
-      {/* --- NEW: Pass the onEdit function to the TaskList --- */}
-      <TaskList tasks={starredTasks} onEdit={handleOpenEditModal} />
+      <TaskList 
+        tasks={starredTasks} // Pass the filtered list
+        onEdit={handleOpenEditModal} 
+        onViewDetails={handleOpenDetailModal} // Pass the detail view function
+      />
 
-      {/* --- NEW: Render the EditTaskModal --- */}
       <EditTaskModal 
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         task={taskToEdit}
+      />
+      
+      <TaskDetailModal 
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        task={taskToView}
       />
     </div>
   );
 };
 
 export default StarredTasksPage;
+
+
+
+
+
+
+
+

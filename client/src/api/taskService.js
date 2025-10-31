@@ -25,16 +25,22 @@ const createTask = (taskData, token) => {
   return api.post('/', taskData);
 };
 
-// --- NEW: Function to update any part of a task ---
 const updateTask = (taskId, updateData, token) => {
   const api = getApiClient(token);
   return api.put(`/${taskId}`, updateData);
 };
 
-// --- NEW: Function to "soft delete" a task ---
 const deleteTask = (taskId, token) => {
   const api = getApiClient(token);
   return api.delete(`/${taskId}`);
+};
+
+// --- THIS IS THE NEW FUNCTION ---
+// It sends a DELETE request to the root '/' endpoint
+// with a 'data' payload containing the array of task IDs.
+const deleteTasksPermanently = (taskIds, token) => {
+    const api = getApiClient(token);
+    return api.delete('/', { data: { taskIds } });
 };
 
 
@@ -59,9 +65,21 @@ const taskService = {
   createTask,
   updateTask,
   deleteTask,
+  deleteTasksPermanently, // <-- ADD THE NEW FUNCTION TO THE EXPORT
   getStarredTasks,
   getCompletedTasks,
   getDeletedTasks,
 };
 
 export default taskService;
+
+
+
+
+
+
+
+
+
+
+

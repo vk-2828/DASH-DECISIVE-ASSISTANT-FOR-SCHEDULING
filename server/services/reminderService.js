@@ -2,55 +2,72 @@ const cron = require('node-cron');
 const Task = require('../models/taskModel');
 const Notification = require('../models/notificationModel');
 const { sendEmail } = require('./emailService');
-const { sendSms } = require('./smsService');
 
-// --- NEW: The Cleanup Function ---
+// --- NEW: Function to permanently purge old tasks from the trash ---
+const purgeOldTasks = async () => {
+    try {
+        // Calculate the date 7 days ago
+        const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+
+        // Find tasks that are:
+        // 1. In the trash (isDeleted: true)
+        // 2. Their due date passed more than 7 days ago
+        const tasksToDelete = await Task.find({
+            isDeleted: true,
+            dueDate: { $lt: oneWeekAgo } // $lt means "less than"
+        });
+
+        if (tasksToDelete.length > 0) {
+            console.log(`Found ${tasksToDelete.length} old tasks to purge permanently.`);
+            const idsToDelete = tasksToDelete.map(task => task._id);
+            
+            // Perform a single, efficient operation to delete all matched tasks
+            await Task.deleteMany({ _id: { $in: idsToDelete } });
+        }
+    } catch (error) {
+        console.error('Error during old task purge:', error);
+    }
+};
+
+// --- This is the existing function to move overdue tasks to trash ---
 const cleanupOverdueTasks = async () => {
     const now = new Date();
     try {
-        // Find all tasks that are not deleted and have a due date in the past.
         const overdueTasks = await Task.find({
             isDeleted: false,
-            dueDate: { $lt: now } // $lt means "less than"
+            dueDate: { $lt: now } 
         });
 
         if (overdueTasks.length > 0) {
             console.log(`Found ${overdueTasks.length} overdue tasks to move to trash.`);
-            // Create an array of IDs from the overdue tasks
             const idsToMove = overdueTasks.map(task => task._id);
-            
-            // Perform a single, efficient database operation to update all matched tasks
             await Task.updateMany(
-                { _id: { $in: idsToMove } }, // Match all tasks with these IDs
-                { $set: { isDeleted: true } } // Set their 'isDeleted' status to true
+                { _id: { $in: idsToMove } },
+                { $set: { isDeleted: true } } 
             );
-
-            // Optional: You could create a notification for the user here
-            // For example: await Notification.create({ user: userId, message: `${overdueTasks.length} tasks were moved to trash.` });
         }
     } catch (error) {
         console.error('Error during overdue task cleanup:', error);
     }
 };
 
-
 const startReminderService = () => {
     console.log('Advanced reminder and cleanup service scheduled to run every minute.');
     
-    // This is the main cron job that runs every minute
     cron.schedule('* * * * *', async () => {
         const now = new Date();
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
         console.log(`[${now.toLocaleTimeString()}] Running service checks...`);
 
-        // --- Execute BOTH functions every minute ---
+        // --- Execute ALL THREE functions every minute ---
         await handleReminders(now, currentHour, currentMinute);
         await cleanupOverdueTasks();
+        await purgeOldTasks(); // NEW function is called here
     });
 };
 
-// We've moved the reminder logic into its own async function for clarity
+// The function to handle sending reminders (no changes)
 const handleReminders = async (now, currentHour, currentMinute) => {
     try {
         // Find one-time tasks
@@ -99,69 +116,3 @@ module.exports = { startReminderService };
 
 
 
-
-// const cron = require('node-cron');
-// const Task = require('../models/taskModel');
-// const Notification = require('../models/notificationModel'); // Import the new model
-// const { sendEmail } = require('./emailService');
-// const { sendSms } = require('./smsService');
-
-// const startReminderService = () => {
-//     console.log('Advanced reminder service with notification logging scheduled.');
-//     cron.schedule('* * * * *', async () => {
-//         const now = new Date();
-//         const currentHour = now.getHours();
-//         const currentMinute = now.getMinutes();
-//         console.log(`[${now.toLocaleTimeString()}] Running advanced reminder check...`);
-
-//         try {
-//             // Logic for finding tasks (this part is unchanged)
-//             const oneTimeTasks = await Task.find({
-//                 isCompleted: false, isDeleted: false, 'alarms.repeatDaily': false,
-//                 'alarms.time': { $gte: now, $lt: new Date(now.getTime() + 60 * 1000) }
-//             }).populate('user');
-
-//             const dailyTasks = await Task.find({
-//                 isCompleted: false, isDeleted: false, 'alarms.repeatDaily': true,
-//             }).populate('user');
-
-//             const allTasksToRemind = [...oneTimeTasks];
-//             dailyTasks.forEach(dailyTask => {
-//                 const shouldRemind = dailyTask.alarms.some(alarm => 
-//                     alarm.repeatDaily &&
-//                     new Date(alarm.time).getHours() === currentHour &&
-//                     new Date(alarm.time).getMinutes() === currentMinute
-//                 );
-//                 if (shouldRemind && !allTasksToRemind.find(t => t._id.equals(dailyTask._id))) {
-//                     allTasksToRemind.push(dailyTask);
-//                 }
-//             });
-
-//             if (allTasksToRemind.length > 0) {
-//                 console.log(`Found ${allTasksToRemind.length} tasks with reminders.`);
-//                 for (const task of allTasksToRemind) {
-//                     if (task.user) {
-//                         const reminderMessage = `Reminder for your task: "${task.title}".`;
-                        
-//                         // --- THIS IS THE NEW LOGIC ---
-//                         // 1. Create the notification record in the database FIRST.
-//                         await Notification.create({
-//                             user: task.user._id,
-//                             message: reminderMessage,
-//                         });
-
-//                         // 2. Then, send the actual email/SMS notifications.
-//                         const emailSubject = `🔔 Quick Reminder: ${task.title}`;
-//                         const smsBody = `DASH Reminder: Time to focus on "${task.title}". You can do it!`;
-//                         await sendEmail(task.user.email, emailSubject, `Hi ${task.user.name}, ${reminderMessage}`);
-//                         // await sendSms(task.user.phoneNumber, smsBody);
-//                     }
-//                 }
-//             }
-//         } catch (error) {
-//             console.error('Error running reminder service:', error);
-//         }
-//     });
-// };
-
-// module.exports = { startReminderService };

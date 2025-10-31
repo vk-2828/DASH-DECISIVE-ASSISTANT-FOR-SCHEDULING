@@ -9,7 +9,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const notificationRoutes = require('./routes/notificationRoutes'); // <-- THIS WAS THE MISSING LINE
-
+const aiRoutes = require('./routes/aiRoutes');
 const { startReminderService } = require('./services/reminderService');
 
 // --- INITIALIZATION ---
@@ -25,7 +25,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes); // This line will now work correctly
-
+app.use('/api/ai', aiRoutes);
 // --- ERROR HANDLING ---
 app.use((err, req, res, next) => {
     console.error(err.stack);

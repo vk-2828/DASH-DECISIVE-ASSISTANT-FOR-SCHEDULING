@@ -60,7 +60,7 @@ Content-Type: application/json
 # This will create a task for the logged-in user.
 POST http://localhost:4000/api/tasks
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2ODQwNiwiZXhwIjoxNzYzNTYwNDA2fQ.Io5miPuuWcyZgmML7xUx870JcKbxXhidMch2gEmxwVg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Zjc5ODFmMzEzMjllZGY3NzMxZGUwNyIsImlhdCI6MTc2MjQ1MDYyMywiZXhwIjoxNzY1MDQyNjIzfQ.adc2cm-Nr5TD-TEQ2C8YCxEEPX6WfTDUXxkPZ0oJ8ak
 
 {
   "title": "Lets work on Frontend for DASH ",
@@ -68,18 +68,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzM
   "priority": 95,
   "dueDate": "2025-11-15T18:00:00.000Z",
   "isStarred": true,
-  "alarms": ["2025-11-15T09:00:00.000Z"]
+  "alarms": [
+    { "time": "2025-11-15T09:00:00.000Z" }
+  ]
 }
+
+
 
 ### 6. Get all of the user's active tasks
 GET http://localhost:4000/api/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NzQ1MiwiZXhwIjoxNzYzNTU5NDUyfQ.2XFY7UGqFPD9COCppn_6LJPATfuhsAI_KOHJV8KcY3A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Zjc5ODFmMzEzMjllZGY3NzMxZGUwNyIsImlhdCI6MTc2MjQ0OTYyOCwiZXhwIjoxNzY1MDQxNjI4fQ.Uc552bClZPHQeCTNppEWO8E8TJN0NsY6rpmaGpOI63Q
 
 
 
 ### 7. Get only starred tasks
 GET http://localhost:4000/api/tasks/starred
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjYzNGMzMmVlY2FjMjIyYmEzZmJkNiIsImlhdCI6MTc2MDk2NjY4NCwiZXhwIjoxNzYzNTU4Njg0fQ.MVnxiCmJiE9N3bESgo0rNN-AfufES4zGTygmMFoY_Y0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Zjc5ODFmMzEzMjllZGY3NzMxZGUwNyIsImlhdCI6MTc2MjQ0OTYyOCwiZXhwIjoxNzY1MDQxNjI4fQ.Uc552bClZPHQeCTNppEWO8E8TJN0NsY6rpmaGpOI63Q
 
 
 

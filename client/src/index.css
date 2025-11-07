@@ -1,1 +1,31 @@
+
+
+/* 1. Import Tailwind's base styles */
 @import "tailwindcss";
+
+/* 2. Define our 'Grey & White' theme variables AND animations */
+@theme {
+  /* --- Colors (from before) --- */
+  --color-button-primary: #4f46e5;    /* A nice Indigo-600 */
+  --color-button-hover: #4338ca;      /* A darker Indigo-700 */
+  --color-text-link: #4f46e5;         /* Link color to match button */
+  --color-text-link-hover: #3730a3;   /* Darker link hover */
+
+  /* --- NEW: Keyframes for Animations --- */
+  --keyframes-fade-in-up: {
+    '0%': { opacity: 0; transform: translateY(20px); },
+    '100%': { opacity: 1; transform: translateY(0); },
+  };
+  
+  --keyframes-float: {
+    '0%': { transform: translateY(0px); },
+    '50%': { transform: translateY(-10px); },
+    '100%': { transform: translateY(0px); },
+  };
+
+  /* --- NEW: Animation Utilities --- */
+  --animation-fade-in-up-fast: fade-in-up 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  --animation-fade-in-up-normal: fade-in-up 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  --animation-fade-in-up-slow: fade-in-up 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  --animation-float-gentle: float 6s ease-in-out infinite;
+}

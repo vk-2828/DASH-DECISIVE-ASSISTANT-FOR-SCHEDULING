@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import authService from '../api/authService';
 import { toast } from 'react-toastify';
 
-// --- Reusable SVG Icons for showing/hiding password ---
+// --- Reusable SVG Icons (No Changes) ---
 const EyeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -20,7 +20,7 @@ const EyeSlashIcon = () => (
 const RegisterPage = () => {
   const [formData, setFormData] = useState({ name: '', email: '', phoneNumber: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,24 +42,28 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0">
-      <div className="w-full bg-white rounded-lg shadow-xl md:mt-0 sm:max-w-md xl:p-0">
+    // Vertically center the card, add padding for spacing from header
+    <div className="flex flex-col items-center justify-start p-12 md:pt-20 px-6">
+      {/* Added animation, subtle border, and larger shadow */}
+      <div className="w-full bg-white rounded-lg shadow-lg border border-gray-200 sm:max-w-md animate-fade-in-up-fast">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-          <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
+          {/* Made title larger and centered */}
+          <h1 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 md:text-3xl text-center">
             Create an Account
           </h1>
-          <form className="space-y-4 md:space-y-6" onSubmit={onSubmit}>
+          <form className="space-y-6" onSubmit={onSubmit}>
             <div>
               <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900">Your Name</label>
-              <input type="text" name="name" id="name" value={formData.name} onChange={onChange} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5" placeholder="John Doe" required />
+              {/* Updated input styles for light theme */}
+              <input type="text" name="name" id="name" value={formData.name} onChange={onChange} className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5" placeholder="John Doe" required />
             </div>
             <div>
               <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Your Email</label>
-              <input type="email" name="email" id="email" value={formData.email} onChange={onChange} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5" placeholder="name@company.com" required />
+              <input type="email" name="email" id="email" value={formData.email} onChange={onChange} className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5" placeholder="name@company.com" required />
             </div>
-             <div>
+            <div>
               <label htmlFor="phoneNumber" className="block mb-2 text-sm font-medium text-gray-900">Phone Number</label>
-              <input type="tel" name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={onChange} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5" placeholder="+911234567890" required />
+              <input type="tel" name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={onChange} className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5" placeholder="+911234567890" required />
             </div>
             <div>
               <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
@@ -71,7 +75,7 @@ const RegisterPage = () => {
                   value={formData.password}
                   onChange={onChange}
                   placeholder="••••••••"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                  className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5"
                   required
                 />
                 <button
@@ -83,11 +87,13 @@ const RegisterPage = () => {
                 </button>
               </div>
             </div>
-            <button type="submit" disabled={loading} className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:bg-blue-400">
+            {/* Updated button styles to use theme colors */}
+            <button type="submit" disabled={loading} className="w-full text-white bg-button-primary hover:bg-button-hover focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-75">
               {loading ? 'Creating Account...' : 'Create an account'}
             </button>
-            <p className="text-sm font-light text-gray-500">
-              Already have an account? <Link to="/login" className="font-medium text-blue-600 hover:underline">Login here</Link>
+            {/* Updated link styles to use theme colors */}
+            <p className="text-sm font-light text-gray-600 text-center">
+              Already have an account? <Link to="/login" className="font-medium text-text-link hover:text-text-link-hover hover:underline">Login here</Link>
             </p>
           </form>
         </div>
@@ -97,3 +103,12 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
+
+
+
+
+
+
+
+
+

@@ -4,43 +4,37 @@ import TaskList from './TaskList';
 import AddTaskModal from './AddTaskModal';
 import EditTaskModal from './EditTaskModal';
 import TaskDetailModal from './TaskDetailModal';
+import { Plus, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 
-// A simple, reusable loading spinner component
+// Enhanced loading spinner
 const Spinner = () => (
-  <div className="flex justify-center items-center py-10">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  <div className="flex flex-col justify-center items-center py-20">
+    <div className="relative">
+      <Loader2 className="h-16 w-16 text-indigo-600 animate-spin" />
+      <div className="absolute inset-0 h-16 w-16 border-4 border-purple-200 rounded-full animate-pulse"></div>
+    </div>
+    <p className="mt-4 text-gray-600 font-medium animate-pulse">Loading your tasks...</p>
   </div>
 );
 
 const AllTasksPage = () => {
-  // Get the global state and functions using our custom hook
-  // 'tasks' here is the *filtered* list, thanks to our updated TaskProvider
   const { tasks, loading, error, addTask } = useTasks();
-
-  // State to control the "Add New Task" modal
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  
-  // State to control the "Edit Task" modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [taskToEdit, setTaskToEdit] = useState(null); // This will hold the task being edited
-
-  // State to control the "Task Details" modal
+  const [taskToEdit, setTaskToEdit] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [taskToView, setTaskToView] = useState(null);
 
-  // Function to open the edit modal with the correct task data
   const handleOpenEditModal = (task) => {
     setTaskToEdit(task);
     setIsEditModalOpen(true);
   };
 
-  // Function to close the edit modal
   const handleCloseEditModal = () => {
     setTaskToEdit(null);
     setIsEditModalOpen(false);
   };
 
-  // Functions to open and close the details modal
   const handleOpenDetailModal = (task) => {
     setTaskToView(task);
     setIsDetailModalOpen(true);
@@ -51,44 +45,82 @@ const AllTasksPage = () => {
     setIsDetailModalOpen(false);
   };
 
-  // 1. Handle the loading state
   if (loading) {
     return <Spinner />;
   }
 
-  // 2. Handle the error state
   if (error) {
     return (
-      <div className="text-center py-10">
-        <p className="text-red-500 font-semibold">{error}</p>
-        <p className="text-gray-500 mt-2">Could not load tasks. Please try refreshing the page.</p>
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 max-w-md text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-red-100 rounded-full">
+              <AlertCircle className="h-12 w-12 text-red-600" />
+            </div>
+          </div>
+          <h3 className="text-xl font-bold text-red-900 mb-2">Oops! Something went wrong</h3>
+          <p className="text-red-700 font-medium mb-4">{error}</p>
+          <p className="text-sm text-red-600">Could not load tasks. Please try refreshing the page.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-6 px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors duration-200"
+          >
+            Refresh Page
+          </button>
+        </div>
       </div>
     );
   }
 
-  // 3. Render the page
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">All Tasks</h1>
+    <div className="p-6 bg-gradient-to-br from-slate-50 to-indigo-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+            <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600" />
+            All Tasks
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            {tasks.length === 0 ? 'No tasks yet' : `${tasks.length} task${tasks.length !== 1 ? 's' : ''} in your workspace`}
+          </p>
+        </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+          className="group relative px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center"
         >
-          + Add New Task
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5 group-hover:rotate-90 transition-transform duration-300" />
+          Add New Task
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
         </button>
       </div>
 
-      {/* We pass the filtered list and the modal handlers down to the TaskList */}
-      <TaskList 
-        tasks={tasks} 
-        onEdit={handleOpenEditModal} 
-        onViewDetails={handleOpenDetailModal} 
-      />
+      {/* Tasks List */}
+      {tasks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+          <div className="bg-white rounded-2xl p-8 sm:p-12 shadow-xl border border-gray-200 text-center max-w-md w-full">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-indigo-600" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">No tasks yet!</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Get started by creating your first task and stay organized.</p>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
+            >
+              Create Your First Task
+            </button>
+          </div>
+        </div>
+      ) : (
+        <TaskList 
+          tasks={tasks} 
+          onEdit={handleOpenEditModal} 
+          onViewDetails={handleOpenDetailModal} 
+        />
+      )}
 
-      {/* Render all three modals */}
-      {/* They will only be visible when their 'isOpen' prop is true */}
-      
+      {/* Modals */}
       <AddTaskModal 
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

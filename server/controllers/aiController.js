@@ -54,38 +54,135 @@ const generateAlarmsAndDueDate = (taskDetails) => {
 
 // --- Feature 1: AI Help Assistant (IMPROVED CONTEXT) ---
 exports.askAboutDash = async (req, res) => {
-    const { question } = req.body;
-    if (!question) { return res.status(400).json({ message: 'Question is required.' }); }
+    console.log('=== askAboutDash called ===');
+    console.log('Request body:', req.body);
+
+    // Accept either `question` (legacy) or `textInput` (from /command -> HELP)
+    let { question, textInput } = req.body || {};
+    let userQuestion = (typeof question === 'string' && question.trim())
+        ? question.trim()
+        : (typeof textInput === 'string' ? textInput.trim() : '');
+
+    if (!userQuestion) {
+        console.log('ERROR: No question/textInput provided');
+        return res.status(400).json({ message: 'Question is required.' });
+    }
+
+    console.log('Question received:', userQuestion);
+
+    // Fast-path: respond to simple greetings without calling the LLM
+    const greetingRegex = /^(hi+|hello|hey+|yo+|hola|sup|hlo+)\b/i;
+    if (greetingRegex.test(userQuestion)) {
+        return res.json({
+            answer: [
+                'Hi! I\'m your DASH assistant. I can help you manage tasks, answer questions, and navigate the app.',
+                'Try these:',
+                '- Create or update tasks',
+                '- See what\'s overdue or due today',
+                '- View your calendar and notifications',
+                '',
+                'Open [All Tasks](/tasks), check your [Starred Tasks](/tasks/starred), or view the [Calendar](/tasks/calendar).'
+            ].join('\n')
+        });
+    }
 
     const context = `
         You are DASH (Decisive Assistant for Scheduling), a helpful AI assistant for a task management app.
-        Your goal is to answer user questions about how to use the app.
+        Your goal is to answer user questions about how to use the app in a friendly, professional manner.
 
-        RULES FOR YOUR RESPONSE:
-        1.  **Use simple, clear language.**
-        2.  **Use bullet points (-) or numbered lists (1., 2.) for steps or lists.**
-        3.  **DO NOT use any Markdown formatting.** This means no asterisks (**) for bolding.
-        4.  **Answer ONLY questions related to DASH features.** If asked something else (like politics or science), politely say, "I can only help with questions about the DASH app."
-        5.  **CRITICAL PRIVACY RULE:** You MUST NOT provide the developer's contact info (Vamshi Krishna, vamshikrishnadaripelli22@gmail.com) UNLESS the user *specifically* asks "How do I contact the developer?" or "Who made this app?"
+        CRITICAL SCOPE RULE:
+        - You can ONLY answer questions about DASH app features, task management, navigation, and app functionality.
+        - If the user asks about politics, science, general knowledge, weather, news, or anything NOT related to DASH:
+          Respond EXACTLY: "I can only help with DASH app features like task management, navigation, and app functionality. Please ask about creating tasks, setting reminders, viewing your calendar, or any other DASH features!"
+        - DO NOT attempt to answer out-of-scope questions even partially.
 
-        DASH APP FEATURES:
-        - Tasks: Create, edit, delete, complete, and star tasks.
-        - Priority: Set task priority from 0-100%.
-        - Reminders: Add multiple reminders, including daily recurring ones.
-        - Views: "All Tasks", "Starred", "Completed", and "Trash" (with restore).
-        - Calendar: A page to see all tasks on a calendar.
-        - Profile Page: A page to update your profile and see a pie chart of your task stats.
-        - Notifications: A page to see your reminder history.
-        - Auto-Cleanup: Overdue tasks are moved to the trash automatically.
+        RESPONSE FORMAT RULES:
+        1. Use simple, clear, conversational language. Be friendly and professional.
+        2. Use bullet points (-) or numbered lists (1., 2., 3.) for steps or feature lists.
+        3. DO NOT use Markdown bold/italic syntax (**text**, *text*). Use plain text only.
+        4. When mentioning app pages or features, format them as clickable links:
+           - Format: [Link Text](/url/path)
+           - Examples: "Check your [All Tasks](/tasks) page", "View the [Calendar](/tasks/calendar)", "See your [Profile](/profile)"
+        5. After providing information, suggest relevant navigation links.
+        6. CRITICAL PRIVACY: Never provide developer contact info unless user asks "How do I contact the developer?" or similar.
+
+        COMPREHENSIVE DASH FEATURES:
+
+        PAGES & NAVIGATION:
+        - [All Tasks](/tasks): Your main task hub. Create new tasks, edit existing ones, mark tasks complete, star important ones, or delete tasks.
+        - [Starred Tasks](/tasks/starred): Quick access to your most important tasks. Star any task to see it here.
+        - [Completed Tasks](/tasks/completed): Archive of all finished tasks. Review your accomplishments!
+        - [Trash](/tasks/trash): Deleted tasks land here. Recover tasks or permanently delete them. Overdue tasks automatically move here.
+        - [Calendar](/tasks/calendar): Visual calendar view showing all your tasks by date. Great for planning ahead.
+        - [Notifications](/tasks/notifications): History of all reminders sent to you (email/SMS). Track your reminder activity.
+        - [Profile](/profile): Update your name, phone number, and password. View task statistics and analytics.
+
+        TASK MANAGEMENT FEATURES:
+        - Creating Tasks: Click "Add Task" button, enter title (required), optional description, set due date/time, set priority (0-100%), add reminders.
+        - Editing Tasks: Click any task to open details, click "Edit" button, modify any field, save changes.
+        - Completing Tasks: Click the checkmark icon on any task. Completed tasks move to [Completed Tasks](/tasks/completed).
+        - Starring Tasks: Click the star icon to mark tasks as important. View all starred tasks on [Starred Tasks](/tasks/starred).
+        - Deleting Tasks: Click the trash icon. Deleted tasks go to [Trash](/tasks/trash) for 30 days before permanent deletion.
+        - Priority System: Slider from 0-100%. Higher values = more important. Use 80-100 for urgent tasks.
+        - Due Dates: Set specific date and time for any task. Tasks appear on [Calendar](/tasks/calendar) on their due date.
+        - Reminders/Alarms: Add multiple reminders per task. Choose specific times. Option for daily recurring reminders.
+        - Auto-Cleanup: Tasks overdue by 7+ days automatically move to [Trash](/tasks/trash) to keep your list clean.
+
+        REMINDER SYSTEM:
+        - Email & SMS Notifications: Receive reminders via email and optionally SMS (if phone number provided in [Profile](/profile)).
+        - Multiple Reminders: Set as many reminders as you need for one task (e.g., 1 hour before, 10 minutes before).
+        - Recurring Daily Reminders: Option to make reminders repeat every day at the same time.
+        - Reminder History: View all past reminders on [Notifications](/tasks/notifications).
+
+        COMMON QUESTIONS & ANSWERS:
+        Q: How do I create a task?
+        A: Go to [All Tasks](/tasks), click the "Add Task" button, fill in the title (required), add optional details like description, due date, priority, and reminders, then click "Create Task".
+
+        Q: How do I set a reminder?
+        A: When creating or editing a task, click "Add Reminder", select the date and time, optionally check "Repeat Daily", then save.
+
+        Q: Where do completed tasks go?
+        A: Completed tasks move to [Completed Tasks](/tasks/completed). You can still view, restore, or permanently delete them from there.
+
+        Q: What happens to overdue tasks?
+        A: Tasks that are overdue by 7 or more days automatically move to [Trash](/tasks/trash). You can recover them from there if needed.
+
+        Q: How do I star a task?
+        A: Click the star icon next to any task to mark it as important. View all starred tasks on [Starred Tasks](/tasks/starred).
+
+        Q: Can I change my password?
+        A: Yes! Go to [Profile](/profile), scroll to "Change Password" section, enter current and new password, then save.
+
+        Q: How do I view my task statistics?
+        A: Visit your [Profile](/profile) page to see total tasks, completed tasks, pending tasks, starred tasks, and more.
+
+        Q: What's the Calendar view?
+        A: The [Calendar](/tasks/calendar) page shows all your tasks visually organized by their due dates. Great for planning your week/month.
+
+        ANSWERING STYLE:
+        - Be concise but complete. Don't over-explain simple questions.
+        - Use natural, conversational tone. Avoid robotic language.
+        - Always suggest relevant navigation links after answering.
+        - If unsure what the user needs, ask clarifying questions or suggest multiple relevant pages.
+        - Example good answer: "You can create a task by going to [All Tasks](/tasks) and clicking the 'Add Task' button. Fill in the title, set a due date, and add any reminders you need!"
     `;
-    const prompt = `${context}\n\nUser Question: "${question}"\n\nAnswer:`;
+    const prompt = `${context}\n\nUser Question: "${userQuestion}"\n\nYour Answer:`;
     try {
         const answer = await generateText(prompt);
-        const cleanedAnswer = answer.replace(/^[*\-]\s/gm, '').trim(); 
-        res.json({ answer: cleanedAnswer });
+        res.json({ answer });
     } catch (error) {
         console.error("Error getting answer from AI:", error);
-        res.status(500).json({ message: 'Failed to get answer from AI assistant.' });
+        // Provide a safe fallback so the chat never feels broken
+        return res.status(200).json({
+            answer: [
+                'I had trouble reaching the AI service just now. Here are some things I can help with:',
+                '- Create a new task with a title, due date, priority, and reminders',
+                '- Show what\'s overdue or due today',
+                '- Open your calendar or completed tasks',
+                '',
+                'You can navigate to [All Tasks](/tasks), [Starred Tasks](/tasks/starred), [Completed Tasks](/tasks/completed), or [Calendar](/tasks/calendar).'
+            ].join('\n')
+        });
     }
 };
 
@@ -125,18 +222,59 @@ async function handleCreateTask(userId, textInput) {
 
 // --- Handler for READ Intent ---
 async function handleReadTasks(userId, textInput) {
-    const userTasks = await Task.find({ user: userId, isDeleted: false, isCompleted: false }).select('title description priority dueDate');
-    const taskListForAI = userTasks.map(t => ({ id: t._id, title: t.title, description: t.description, dueDate: t.dueDate }));
+    const userTasks = await Task.find({ user: userId, isDeleted: false }).select('title description priority dueDate isCompleted isStarred');
+    
+    // Calculate analytics
+    const totalTasks = userTasks.length;
+    const completedTasks = userTasks.filter(t => t.isCompleted).length;
+    const pendingTasks = totalTasks - completedTasks;
+    const starredTasks = userTasks.filter(t => t.isStarred && !t.isCompleted).length;
+    const now = new Date();
+    const overdueTasks = userTasks.filter(t => !t.isCompleted && t.dueDate && new Date(t.dueDate) < now).length;
+    const todayTasks = userTasks.filter(t => {
+        if (!t.dueDate || t.isCompleted) return false;
+        const taskDate = new Date(t.dueDate);
+        return taskDate.toDateString() === now.toDateString();
+    }).length;
+    
+    const taskListForAI = userTasks
+        .filter(t => !t.isCompleted)
+        .map(t => ({
+            title: t.title,
+            priority: t.priority,
+            dueDate: t.dueDate,
+            isStarred: t.isStarred
+        }));
     
     const readPrompt = `
-        You are a helpful assistant. The user wants to know about their tasks.
-        User Input: "${textInput}"
-        User's Current Task List: ${JSON.stringify(taskListForAI)}
-
-        Based on the user's input, analyze their task list and provide a concise, natural language summary.
-        If they ask for "tasks due today", filter the list for today.
-        If they ask for "overdue tasks", filter for tasks with due dates in the past.
-        Answer in simple language and use bullet points if listing more than one task. Do not use Markdown.
+        You are a helpful assistant analyzing a user's task list.
+        
+        User Query: "${textInput}"
+        
+        TASK STATISTICS:
+        - Total Tasks: ${totalTasks}
+        - Pending: ${pendingTasks}
+        - Completed: ${completedTasks}
+        - Starred: ${starredTasks}
+        - Overdue: ${overdueTasks}
+        - Due Today: ${todayTasks}
+        
+        ACTIVE TASKS (Not Completed):
+        ${JSON.stringify(taskListForAI, null, 2)}
+        
+        INSTRUCTIONS:
+        1. Analyze the query and provide relevant information
+        2. If asking for "tasks today" or "overdue", highlight those specifically
+        3. If asking for statistics, provide the numbers above
+        4. Be concise but helpful
+        5. Format lists with bullet points (-)
+        6. At the end, suggest relevant navigation:
+           - If discussing tasks, add: "View your [All Tasks](/tasks) or [Starred Tasks](/tasks/starred)"
+           - If discussing completion, add: "Check [Completed Tasks](/tasks/completed)"
+           - If discussing analytics, add: "See detailed stats on your [Profile](/profile)"
+        7. Use plain text only, no Markdown bold/italic
+        
+        Provide a natural, conversational response.
     `;
     const summary = await generateText(readPrompt);
     return { message: summary };
@@ -217,9 +355,34 @@ async function handleDeleteTask(userId, textInput) {
 // --- Feature 2: The "Super-Assistant" Command Processor ---
 // This is the main router function that decides which helper to call.
 exports.processAiCommand = async (req, res) => {
-    const { textInput } = req.body;
+    console.log('=== AI Command Request ===');
+    console.log('Body:', req.body);
+    console.log('User ID:', req.user?.id);
+
+    // Accept both { textInput } and { question } and normalize
+    const rawInput = (req.body && (req.body.textInput ?? req.body.question)) || '';
+    const textInput = (typeof rawInput === 'string' ? rawInput : String(rawInput)).trim();
     const userId = req.user.id;
-    if (!textInput) { return res.status(400).json({ message: 'Text input is required.' }); }
+    if (!textInput) {
+        console.log('ERROR: textInput/question is missing or empty');
+        return res.status(400).json({ message: 'Text input is required.' });
+    }
+
+    // Fast path: greetings handled immediately to avoid HELP path edge cases
+    const greetingRegex = /^(hi+|hello|hey+|yo+|hola|sup|hlo+)\b/i;
+    if (greetingRegex.test(textInput)) {
+        return res.json({
+            answer: [
+                'Hi! I\'m your DASH assistant. I can help you manage tasks, answer questions, and navigate the app.',
+                'Try these:',
+                '- Create a task with title, due date, priority, and reminders',
+                '- Check what\'s overdue or due today',
+                '- Open your calendar or completed tasks',
+                '',
+                'Open [All Tasks](/tasks), see [Starred Tasks](/tasks/starred), or view the [Calendar](/tasks/calendar).'
+            ].join('\n')
+        });
+    }
 
     // --- 1. First Pass: Determine User Intent ---
     const intentSchema = { type: "OBJECT", properties: {
@@ -257,14 +420,21 @@ exports.processAiCommand = async (req, res) => {
                 result = await handleDeleteTask(userId, textInput);
                 return res.json(result);
             case 'HELP':
-                // Pass the original request object (req) to the askAboutDash function
+                // Reformat the request body to match askAboutDash's expected format
+                req.body.question = textInput;
+                req.body.textInput = textInput;
                 return exports.askAboutDash(req, res);
             default:
                 // If intent is UNKNOWN or anything else, pass to help
+                req.body.question = textInput;
+                req.body.textInput = textInput;
                 return exports.askAboutDash(req, res);
         }
     } catch (error) {
-        console.error("Error in processAiCommand:", error);
+        console.error("=== ERROR in processAiCommand ===");
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+        console.error("User input was:", req.body.textInput);
         res.status(500).json({ message: 'Failed to process AI command. Check server logs.' });
     }
 };

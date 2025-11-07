@@ -19,10 +19,37 @@ const getApiClient = () => {
 
 // --- THIS IS THE NEW UNIFIED FUNCTION ---
 // It calls the new '/command' endpoint for all AI interactions
+// If the server responds with 400 (e.g., missing field expected by HELP path),
+// automatically falls back to '/ask' with the same text as a question.
 const sendAiCommand = async (textInput) => {
+  console.log('=== Sending AI Command ===');
+  console.log('Text Input:', textInput);
+  console.log('API URL:', API_URL);
+
   const api = getApiClient();
-  const response = await api.post('/command', { textInput });
-  return response.data; // Return the full response (e.g., { message: "..." } or { task: {...} })
+  try {
+    const response = await api.post('/command', { textInput });
+    console.log('AI Response:', response.data);
+    return response.data; // { message, task } or { answer }
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.message || '';
+    console.warn('AI command error:', status, msg);
+
+    // Fallback for HELP/greetings or schema mismatches
+    if (status === 400) {
+      try {
+        const fallback = await api.post('/ask', { question: textInput });
+        console.log('AI Fallback (/ask) Response:', fallback.data);
+        return fallback.data;
+      } catch (fallbackErr) {
+        console.error('AI fallback (/ask) failed:', fallbackErr?.response?.status, fallbackErr?.response?.data);
+        throw fallbackErr;
+      }
+    }
+
+    throw err;
+  }
 };
 
 // --- We also keep the 'askAI' function for now, but point it to the new command ---

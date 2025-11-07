@@ -6,8 +6,8 @@ import TaskDetailModal from './TaskDetailModal';
 import { toast } from 'react-toastify';
 
 const Spinner = () => (
-  <div className="flex justify-center items-center py-10">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  <div className="flex justify-center items-center py-8 sm:py-10">
+    <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-red-500"></div>
   </div>
 );
 
@@ -62,14 +62,14 @@ const TrashPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Trash</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">Trash</h1>
         {/* --- NEW: Delete Button --- */}
         {selectedTasks.length > 0 && (
             <button
                 onClick={handleDeleteSelected}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300"
+                className="px-3 sm:px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300 w-full sm:w-auto"
             >
                 {isDeleting ? 'Deleting...' : `Delete ${selectedTasks.length} Permanently`}
             </button>
@@ -78,14 +78,14 @@ const TrashPage = () => {
 
       {/* --- NEW: Selection Header --- */}
       {trashTasks.length > 0 && (
-        <div className="flex items-center p-2 mb-4 bg-white rounded-md shadow-sm border">
+        <div className="flex items-center p-3 sm:p-4 mb-3 sm:mb-4 bg-white rounded-xl shadow-sm border border-gray-200">
             <input
                 type="checkbox"
-                className="h-5 w-5 text-blue-600 border-gray-300 rounded"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 border-gray-300 rounded focus:ring-2 focus:ring-red-500"
                 checked={isAllSelected}
                 onChange={handleSelectAll}
             />
-            <label className="ml-3 text-sm font-medium text-gray-700">
+            <label className="ml-2 sm:ml-3 text-xs sm:text-sm font-medium text-gray-700">
                 Select All ({selectedTasks.length} selected)
             </label>
         </div>

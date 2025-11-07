@@ -72,51 +72,78 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import useTasks from '../hooks/useTasks'; // Import the useTasks hook
+import useTasks from '../hooks/useTasks';
+import { Calendar, Bell, User, Search, Menu } from 'lucide-react';
 
-// Placeholder Icons (no changes)
-const CalendarIcon = () => <span>📅</span>;
-const BellIcon = () => <span>🔔</span>;
-const UserIcon = () => <span>👤</span>;
-
-const DashboardHeader = () => {
+const DashboardHeader = ({ onMenuClick }) => {
   const { user } = useAuth();
-  
-  // --- NEW: Get search state and setter from the context ---
   const { searchTerm, setSearchTerm } = useTasks();
 
   return (
-    <header className="w-full bg-white p-4 flex justify-between items-center border-b border-gray-200 space-x-4">
+    <header className="w-full bg-white/80 backdrop-blur-md p-3 sm:p-4 flex justify-between items-center border-b border-gray-200 shadow-sm sticky top-0 z-40">
       
-      {/* Search Bar - Now fully functional */}
-      <div className="relative flex-1 max-w-xs">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={onMenuClick}
+        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 mr-2"
+      >
+        <Menu className="w-6 h-6 text-gray-600" />
+      </button>
+
+      {/* Search Bar */}
+      <div className="relative flex-1 max-w-md">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4 pointer-events-none">
+          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
         </div>
         <input 
           type="text" 
-          placeholder="Search tasks by title..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-          // --- NEW: Connect input value and onChange ---
+          placeholder="Search tasks..."
+          className="w-full pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white text-xs sm:text-sm transition-all duration-300 placeholder-gray-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Right-side Icons and Profile (no changes) */}
-      <div className="flex items-center space-x-6">
-        <Link to="/tasks/calendar" className="text-gray-500 hover:text-gray-900" title="Calendar">
-          <CalendarIcon />
+      {/* Right-side Icons and Profile */}
+      <div className="flex items-center space-x-2 sm:space-x-3 ml-3 sm:ml-6">
+        <Link 
+          to="/tasks/calendar" 
+          className="group relative p-2 sm:p-3 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-300 transform hover:scale-110" 
+          title="Calendar"
+        >
+          <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
         </Link>
-        <Link to="/tasks/notifications" className="text-gray-500 hover:text-gray-900" title="Notifications">
-          <BellIcon />
+        
+        <Link 
+          to="/tasks/notifications" 
+          className="group relative p-2 sm:p-3 rounded-xl text-gray-500 hover:text-pink-600 hover:bg-pink-50 transition-all duration-300 transform hover:scale-110" 
+          title="Notifications"
+        >
+          <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 sm:h-5 sm:w-5 bg-pink-500 text-white text-[9px] sm:text-xs items-center justify-center font-bold">3</span>
+          </span>
         </Link>
-        <div className="relative">
-          <Link to="/profile" className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600">
-            <UserIcon />
-            <span>{user?.name || 'My Account'}</span>
-          </Link>
-        </div>
+        
+        <div className="h-6 sm:h-8 w-px bg-gray-300 hidden sm:block"></div>
+        
+        <Link 
+          to="/profile" 
+          className="group flex items-center space-x-2 sm:space-x-3 px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-300"
+        >
+          <div className="relative">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300 text-sm sm:text-base">
+              {user?.name?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-white rounded-full"></div>
+          </div>
+          <div className="hidden md:block">
+            <p className="font-semibold text-xs sm:text-sm">{user?.name || 'My Account'}</p>
+            <p className="text-[10px] sm:text-xs text-gray-500">View Profile</p>
+          </div>
+        </Link>
       </div>
     </header>
   );

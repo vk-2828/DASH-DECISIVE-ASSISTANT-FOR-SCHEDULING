@@ -58,29 +58,28 @@ const LoginPage = () => {
         />
       </div>
 
-      {/* Glassmorphism Card */}
-      <div className="w-full max-w-md p-8 space-y-6 bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200 animate-fade-in-up-fast">
-        <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 text-center">
+      {/* Glassmorphism Card with hover effect */}
+      <div className="w-full max-w-md p-8 space-y-6 bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200/50 animate-fade-in-up-fast hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent text-center">
           Sign in to DASH
         </h1>
         <form className="space-y-6" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Your email</label>
-            {/* Inputs are now white with a subtle border */}
+            <label htmlFor="email" className="block mb-2 text-sm font-semibold text-gray-900">Your email</label>
             <input 
               type="email" 
               name="email" 
               id="email" 
               value={formData.email} 
               onChange={onChange} 
-              className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5 placeholder-gray-400" 
+              className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 placeholder-gray-400 transition-all duration-200 hover:border-indigo-400" 
               placeholder="name@company.com" 
               required 
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
+            <label htmlFor="password" className="block mb-2 text-sm font-semibold text-gray-900">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -89,13 +88,13 @@ const LoginPage = () => {
                 value={formData.password}
                 onChange={onChange}
                 placeholder="••••••••"
-                className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5 placeholder-gray-400"
+                className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 pr-10 placeholder-gray-400 transition-all duration-200 hover:border-indigo-400"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 z-10"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 z-10 hover:scale-110 transition-transform duration-200"
               >
                 {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
               </button>
@@ -105,13 +104,16 @@ const LoginPage = () => {
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full text-white bg-button-primary hover:bg-button-hover focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-3 text-center disabled:opacity-75 transition-all duration-200"
+            className="w-full text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-semibold rounded-lg text-sm px-5 py-3 text-center disabled:opacity-75 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
           
           <p className="text-sm font-medium text-gray-600 text-center">
-            Don’t have an account yet? <Link to="/register" className="font-medium text-text-link hover:text-text-link-hover hover:underline">Sign up</Link>
+            Don't have an account yet? <Link to="/register" className="font-semibold text-indigo-600 hover:text-purple-600 transition-colors duration-200 relative group">
+              Sign up
+              <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-purple-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
           </p>
         </form>
       </div>

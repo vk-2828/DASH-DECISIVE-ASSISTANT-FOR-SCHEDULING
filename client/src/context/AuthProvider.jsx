@@ -41,12 +41,15 @@ export const AuthProvider = ({ children }) => {
     // 1. Clear everything from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // 2. Clear AI chat history from sessionStorage
+    sessionStorage.removeItem('dashAiChatHistory');
 
-    // 2. Clear the state
+    // 3. Clear the state
     setToken(null);
     setUser(null);
 
-    // 3. Redirect to the home page
+    // 4. Redirect to the home page
     navigate('/home');
   };
 

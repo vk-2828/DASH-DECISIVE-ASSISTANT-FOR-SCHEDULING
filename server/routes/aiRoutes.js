@@ -10,6 +10,16 @@ const router = express.Router();
 // All routes here are protected
 router.use(authMiddleware);
 
+// Debug middleware
+router.use((req, res, next) => {
+    console.log('=== AI Route Hit ===');
+    console.log('Method:', req.method);
+    console.log('Path:', req.path);
+    console.log('Body:', req.body);
+    console.log('Headers:', req.headers.authorization ? 'Token present' : 'No token');
+    next();
+});
+
 // @route   POST /api/ai/ask
 // @desc    Ask the AI assistant a "help" question about DASH
 router.post('/ask', askAboutDash);

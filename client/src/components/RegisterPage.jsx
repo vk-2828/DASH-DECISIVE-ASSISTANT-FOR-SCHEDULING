@@ -42,31 +42,44 @@ const RegisterPage = () => {
   };
 
   return (
-    // Vertically center the card, add padding for spacing from header
-    <div className="flex flex-col items-center justify-start p-12 md:pt-20 px-6">
-      {/* Added animation, subtle border, and larger shadow */}
-      <div className="w-full bg-white rounded-lg shadow-lg border border-gray-200 sm:max-w-md animate-fade-in-up-fast">
+    // Main container with gradient background matching HomePage
+    <div className="relative flex flex-col items-center justify-center min-h-[calc(100vh-140px)] py-12 px-6 overflow-hidden">
+      {/* Decorative background element matching HomePage */}
+      <div
+        className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+        aria-hidden="true"
+      >
+        <div
+          className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20"
+          style={{
+            clipPath:
+              'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+          }}
+        />
+      </div>
+
+      {/* Floating card with glassmorphism effect */}
+      <div className="w-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200/50 sm:max-w-md animate-fade-in-up-fast hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-          {/* Made title larger and centered */}
-          <h1 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 md:text-3xl text-center">
+          {/* Title with gradient text */}
+          <h1 className="text-2xl font-bold leading-tight tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent md:text-3xl text-center">
             Create an Account
           </h1>
           <form className="space-y-6" onSubmit={onSubmit}>
             <div>
-              <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900">Your Name</label>
-              {/* Updated input styles for light theme */}
-              <input type="text" name="name" id="name" value={formData.name} onChange={onChange} className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5" placeholder="John Doe" required />
+              <label htmlFor="name" className="block mb-2 text-sm font-semibold text-gray-900">Your Name</label>
+              <input type="text" name="name" id="name" value={formData.name} onChange={onChange} className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 transition-all duration-200 hover:border-indigo-400" placeholder="John Doe" required />
             </div>
             <div>
-              <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Your Email</label>
-              <input type="email" name="email" id="email" value={formData.email} onChange={onChange} className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5" placeholder="name@company.com" required />
+              <label htmlFor="email" className="block mb-2 text-sm font-semibold text-gray-900">Your Email</label>
+              <input type="email" name="email" id="email" value={formData.email} onChange={onChange} className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 transition-all duration-200 hover:border-indigo-400" placeholder="name@company.com" required />
             </div>
             <div>
-              <label htmlFor="phoneNumber" className="block mb-2 text-sm font-medium text-gray-900">Phone Number</label>
-              <input type="tel" name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={onChange} className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5" placeholder="+911234567890" required />
+              <label htmlFor="phoneNumber" className="block mb-2 text-sm font-semibold text-gray-900">Phone Number</label>
+              <input type="tel" name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={onChange} className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 transition-all duration-200 hover:border-indigo-400" placeholder="+911234567890" required />
             </div>
             <div>
-              <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
+              <label htmlFor="password" className="block mb-2 text-sm font-semibold text-gray-900">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -75,25 +88,28 @@ const RegisterPage = () => {
                   value={formData.password}
                   onChange={onChange}
                   placeholder="••••••••"
-                  className="bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-button-primary focus:border-button-primary block w-full p-2.5"
+                  className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 pr-10 transition-all duration-200 hover:border-indigo-400"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 hover:scale-110 transition-transform duration-200"
                 >
                   {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
                 </button>
               </div>
             </div>
-            {/* Updated button styles to use theme colors */}
-            <button type="submit" disabled={loading} className="w-full text-white bg-button-primary hover:bg-button-hover focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-75">
+            {/* Updated button with gradient and hover effects */}
+            <button type="submit" disabled={loading} className="w-full text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-semibold rounded-lg text-sm px-5 py-3 text-center disabled:opacity-75 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl">
               {loading ? 'Creating Account...' : 'Create an account'}
             </button>
-            {/* Updated link styles to use theme colors */}
-            <p className="text-sm font-light text-gray-600 text-center">
-              Already have an account? <Link to="/login" className="font-medium text-text-link hover:text-text-link-hover hover:underline">Login here</Link>
+            {/* Updated link with underline animation */}
+            <p className="text-sm font-medium text-gray-600 text-center">
+              Already have an account? <Link to="/login" className="font-semibold text-indigo-600 hover:text-purple-600 transition-colors duration-200 relative group">
+                Login here
+                <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-purple-600 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
             </p>
           </form>
         </div>

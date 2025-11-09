@@ -3,27 +3,31 @@ const Otp = require('../models/otpModel');
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const { sendEmail } = require('../services/emailService');
-// NOTE: We no longer need the SMS service here.
 
 // Helper function to generate a JWT
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// --- CONTROLLER FUNCTIONS (UPDATED) ---
-
-// 1. Register User (Only sends Email OTP)
+// 1. Register User (Email only, phone is optional)
 exports.register = async (req, res) => {
     const { name, email, phoneNumber, password } = req.body;
     try {
-        const userExists = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+        const userExists = await User.findOne({ email });
         if (userExists) {
-            return res.status(400).json({ message: 'User with this email or phone number already exists.' });
+            return res.status(400).json({ message: 'User with this email already exists.' });
         }
 
-        const user = await User.create({ name, email, phoneNumber, password });
+        // Check if phone number is provided and already exists
+        if (phoneNumber) {
+            const phoneExists = await User.findOne({ phoneNumber });
+            if (phoneExists) {
+                return res.status(400).json({ message: 'This phone number is already registered.' });
+            }
+        }
 
-        // --- CHANGE: We only generate and send an email OTP now ---
+        const user = await User.create({ name, email, phoneNumber: phoneNumber || null, password });
+
         const emailOtp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
         await Otp.create({ identifier: email, otp: emailOtp });
         await sendEmail(email, 'Verify Your Email for DASH', `Your DASH verification code is: <strong>${emailOtp}</strong>`);
@@ -39,9 +43,8 @@ exports.register = async (req, res) => {
     }
 };
 
-// 2. Verify OTP (Only checks Email OTP)
+// 2. Verify OTP (Email only)
 exports.verifyOtp = async (req, res) => {
-    // --- CHANGE: We only expect the emailOtp from the frontend ---
     const { userId, emailOtp } = req.body;
     try {
         const user = await User.findById(userId);
@@ -49,25 +52,18 @@ exports.verifyOtp = async (req, res) => {
             return res.status(400).json({ message: 'User not found.' });
         }
 
-        // --- CHANGE: We only check for the email OTP record in the database ---
         const emailOtpRecord = await Otp.findOne({ identifier: user.email, otp: emailOtp });
         if (!emailOtpRecord) {
             return res.status(400).json({ message: 'Invalid or expired email verification code.' });
         }
 
-        // --- CHANGE: If email is verified, we mark the phone as verified too to allow login ---
         user.isEmailVerified = true;
-        user.isPhoneVerified = true; // Auto-verify phone to bypass the check
         await user.save();
 
-        // Delete the used OTP
         await Otp.deleteMany({ identifier: user.email });
 
-        // Generate a token and send success response
         res.status(200).json({
             message: 'Account verified successfully! You can now log in.',
-            // We are NOT logging them in automatically anymore.
-            // This is a better user experience, guiding them to the login page.
         });
 
     } catch (error) {
@@ -76,7 +72,7 @@ exports.verifyOtp = async (req, res) => {
     }
 };
 
-// 3. Login User (No changes needed here, but included for completeness)
+// 3. Login User
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -84,8 +80,8 @@ exports.login = async (req, res) => {
         if (!user || !(await user.matchPassword(password))) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
-        if (!user.isEmailVerified || !user.isPhoneVerified) {
-            return res.status(403).json({ message: 'Please verify your account before logging in.' });
+        if (!user.isEmailVerified) {
+            return res.status(403).json({ message: 'Please verify your email before logging in.' });
         }
         res.json({
             message: "Login successful",
@@ -98,8 +94,7 @@ exports.login = async (req, res) => {
     }
 };
 
-
-// 4. Resend OTP (Only resends Email OTP)
+// 4. Resend OTP (Email only)
 exports.resendOtp = async (req, res) => {
     const { email } = req.body;
     try {
@@ -107,7 +102,6 @@ exports.resendOtp = async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User with this email not found.' });
         if (user.isEmailVerified) return res.status(400).json({ message: 'This account is already verified.' });
         
-        // --- CHANGE: Only generate and resend an email OTP ---
         const emailOtp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
         await Otp.deleteMany({ identifier: user.email });
         await Otp.create({ identifier: user.email, otp: emailOtp });
@@ -119,10 +113,9 @@ exports.resendOtp = async (req, res) => {
         res.status(500).json({ message: 'Server error while resending OTPs.' });
     }
 };
-// Add this new function to your authController.js
 
+// 5. Update Profile
 exports.updateProfile = async (req, res) => {
-    // We get the user from the authMiddleware
     const user = await User.findById(req.user.id);
 
     if (user) {
@@ -130,7 +123,6 @@ exports.updateProfile = async (req, res) => {
         user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
 
         if (req.body.password) {
-            // If a new password is provided, we hash and save it
             user.password = req.body.password;
         }
 

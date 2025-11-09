@@ -154,8 +154,38 @@ export const TaskProvider = ({ children }) => {
     );
   }, [searchTerm]);
 
-  const filteredTasks = useMemo(() => filterTasks(tasks), [tasks, filterTasks]);
-  const filteredStarredTasks = useMemo(() => filterTasks(starredTasks), [starredTasks, filterTasks]);
+  // --- Smart Task Prioritization Function ---
+  // Criteria: 1) Priority, 2) Due Date, 3) Reminders
+  const prioritizeTasks = useCallback((taskList) => {
+    return [...taskList].sort((a, b) => {
+      // Criterion 1: Priority (Higher priority first)
+      if (a.priority !== b.priority) {
+        return b.priority - a.priority; // Descending order
+      }
+
+      // Criterion 2: Due Date (Earlier due date first)
+      const aDueDate = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+      const bDueDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+      
+      if (aDueDate !== bDueDate) {
+        return aDueDate - bDueDate; // Ascending order (earliest first)
+      }
+
+      // Criterion 3: Reminders (Tasks with reminders first)
+      const aHasReminders = a.alarms && a.alarms.length > 0;
+      const bHasReminders = b.alarms && b.alarms.length > 0;
+      
+      if (aHasReminders !== bHasReminders) {
+        return bHasReminders ? 1 : -1; // Tasks with reminders come first
+      }
+
+      // If all criteria are equal, maintain original order
+      return 0;
+    });
+  }, []);
+
+  const filteredTasks = useMemo(() => prioritizeTasks(filterTasks(tasks)), [tasks, filterTasks, prioritizeTasks]);
+  const filteredStarredTasks = useMemo(() => prioritizeTasks(filterTasks(starredTasks)), [starredTasks, filterTasks, prioritizeTasks]);
   const filteredCompletedTasks = useMemo(() => filterTasks(completedTasks), [completedTasks, filterTasks]);
   const filteredTrashTasks = useMemo(() => filterTasks(trashTasks), [trashTasks, filterTasks]);
 

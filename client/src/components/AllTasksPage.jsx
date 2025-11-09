@@ -84,6 +84,10 @@ const AllTasksPage = () => {
           <p className="text-sm text-gray-600 mt-1">
             {tasks.length === 0 ? 'No tasks yet' : `${tasks.length} task${tasks.length !== 1 ? 's' : ''} in your workspace`}
           </p>
+          <p className="text-xs text-indigo-600 mt-1 flex items-center gap-1">
+            <span className="inline-block w-2 h-2 bg-indigo-600 rounded-full animate-pulse"></span>
+            Sorted by: Priority → Due Date → Reminders
+          </p>
         </div>
         <button
           onClick={() => setIsAddModalOpen(true)}

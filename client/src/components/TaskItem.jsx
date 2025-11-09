@@ -1,7 +1,7 @@
 import React from 'react';
 import useTasks from '../hooks/useTasks';
 import moment from 'moment';
-import { Star, Edit2, Trash2, Clock, AlertTriangle, RotateCcw, Sparkles } from 'lucide-react';
+import { Star, Edit2, Trash2, Clock, AlertTriangle, RotateCcw, Sparkles, Timer } from 'lucide-react';
 
 const TaskItem = ({ task, onEdit, onViewDetails, selectionMode = false, isSelected = false, onSelectTask = () => {} }) => {
   const { updateTask, deleteTask, restoreTask } = useTasks();
@@ -9,6 +9,30 @@ const TaskItem = ({ task, onEdit, onViewDetails, selectionMode = false, isSelect
   const isOverdueForPurge = task.dueDate && moment().diff(moment(task.dueDate), 'days') > 7;
   const showWarning = task.isDeleted && isOverdueForPurge;
   const isOverdue = task.dueDate && moment(task.dueDate).isBefore(moment()) && !task.isCompleted;
+  
+  // Check if task is due today and calculate time remaining
+  const isDueToday = task.dueDate && moment(task.dueDate).isSame(moment(), 'day') && !task.isCompleted;
+  const getTimeRemaining = () => {
+    if (!isDueToday) return null;
+    const now = moment();
+    const due = moment(task.dueDate);
+    const diff = due.diff(now);
+    
+    if (diff <= 0) return 'Due now!';
+    
+    const duration = moment.duration(diff);
+    const hours = Math.floor(duration.asHours());
+    const minutes = duration.minutes();
+    
+    if (hours === 0) {
+      return `${minutes}m left`;
+    } else if (hours < 24) {
+      return `${hours}h ${minutes}m left`;
+    }
+    return null;
+  };
+  
+  const timeRemaining = getTimeRemaining();
 
   const PriorityBadge = ({ priority }) => {
     let colorClass, text, icon;
@@ -122,6 +146,17 @@ const TaskItem = ({ task, onEdit, onViewDetails, selectionMode = false, isSelect
             }`}>
               <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
               <span className="text-xs font-medium whitespace-nowrap">{moment(task.dueDate).format('MMM D, h:mm A')}</span>
+            </div>
+          )}
+          {/* Time Remaining Badge for Today's Tasks */}
+          {isDueToday && timeRemaining && (
+            <div className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg animate-pulse ${
+              timeRemaining === 'Due now!' 
+                ? 'bg-red-500 text-white font-bold shadow-lg'
+                : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold shadow-md'
+            }`}>
+              <Timer className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 animate-spin" />
+              <span className="text-xs font-bold whitespace-nowrap">{timeRemaining}</span>
             </div>
           )}
           <PriorityBadge priority={task.priority} />

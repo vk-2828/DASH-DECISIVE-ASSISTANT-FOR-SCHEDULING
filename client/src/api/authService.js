@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/auth';
+const API_URL = 'https://dash-decisive-assistant-for-scheduling.onrender.com/api/auth';
 
 const getApiClient = (token) => {
   return axios.create({

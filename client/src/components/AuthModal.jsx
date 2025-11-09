@@ -208,8 +208,10 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                   <input type="email" name="email" id="reg-email" value={formData.email} onChange={onChange} className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 transition-all duration-200 hover:border-indigo-400" placeholder="name@company.com" required />
                 </div>
                 <div>
-                  <label htmlFor="phoneNumber" className="block mb-2 text-sm font-semibold text-gray-900">Phone Number</label>
-                  <input type="tel" name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={onChange} className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 transition-all duration-200 hover:border-indigo-400" placeholder="+911234567890" required />
+                  <label htmlFor="phoneNumber" className="block mb-2 text-sm font-medium text-gray-900">
+                    Phone Number <span className="text-gray-500 text-xs">(optional)</span>
+                  </label>
+                  <input type="tel" name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={onChange} className="bg-white/90 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 transition-all duration-200 hover:border-indigo-400" placeholder="+911234567890" />
                 </div>
                 <div>
                   <label htmlFor="reg-password" className="block mb-2 text-sm font-semibold text-gray-900">Password</label>

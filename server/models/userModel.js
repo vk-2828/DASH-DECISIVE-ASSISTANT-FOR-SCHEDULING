@@ -15,8 +15,9 @@ const userSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        required: [true, 'Phone number is required.'],
+        required: false, // Made optional
         unique: true,
+        sparse: true, // Allows multiple null values
     },
     password: {
         type: String,
@@ -27,12 +28,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    isPhoneVerified: {
-        type: Boolean,
-        default: false,
-    },
+    // Removed isPhoneVerified field
 }, {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
+    strict: true, // Ensures only defined fields are saved
 });
 
 // This function runs automatically before a user document is saved

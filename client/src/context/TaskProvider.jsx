@@ -13,6 +13,12 @@ export const TaskProvider = ({ children }) => {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [trashTasks, setTrashTasks] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [lastViewedTime, setLastViewedTime] = useState(() => {
+    // Load last viewed time from localStorage
+    const saved = localStorage.getItem('notificationsLastViewed');
+    return saved ? new Date(saved) : null;
+  });
   
   // --- Search & Loading State ---
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +51,17 @@ export const TaskProvider = ({ children }) => {
       setCompletedTasks(completed.data);
       setTrashTasks(trash.data);
       setNotifications(notifs.data);
+      
+      // Calculate unread count based on last viewed time
+      const savedTime = localStorage.getItem('notificationsLastViewed');
+      const lastViewed = savedTime ? new Date(savedTime) : null;
+      
+      if (lastViewed) {
+        const unread = notifs.data.filter(n => new Date(n.createdAt) > lastViewed).length;
+        setUnreadCount(unread);
+      } else {
+        setUnreadCount(notifs.data.length);
+      }
     } catch (err) {
       setError('Failed to fetch data.');
       toast.error('Failed to load data. Please try refreshing.');
@@ -119,6 +136,14 @@ export const TaskProvider = ({ children }) => {
   }, [token, refetchAllData]);
   // --- END NEW FUNCTION ---
 
+  // --- Mark Notifications as Read ---
+  const markNotificationsAsRead = useCallback(() => {
+    const now = new Date();
+    setLastViewedTime(now);
+    setUnreadCount(0);
+    localStorage.setItem('notificationsLastViewed', now.toISOString());
+  }, []);
+
   // --- Memoized Filtering Logic ---
   const filterTasks = useCallback((taskList) => {
     if (!searchTerm.trim()) return taskList;
@@ -141,6 +166,7 @@ export const TaskProvider = ({ children }) => {
     completedTasks: filteredCompletedTasks,
     trashTasks: filteredTrashTasks,
     notifications,
+    unreadCount,
     loading,
     error,
     searchTerm,
@@ -150,6 +176,7 @@ export const TaskProvider = ({ children }) => {
     deleteTask,
     restoreTask,
     deleteMultipleTasksPermanently, // Expose the new function
+    markNotificationsAsRead,
     refetchTasks: refetchAllData,
   };
 

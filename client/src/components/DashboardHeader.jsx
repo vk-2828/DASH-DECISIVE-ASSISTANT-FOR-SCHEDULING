@@ -77,7 +77,7 @@ import { Calendar, Bell, User, Search, Menu } from 'lucide-react';
 
 const DashboardHeader = ({ onMenuClick }) => {
   const { user } = useAuth();
-  const { searchTerm, setSearchTerm } = useTasks();
+  const { searchTerm, setSearchTerm, unreadCount } = useTasks();
 
   return (
     <header className="w-full bg-white/80 backdrop-blur-md p-3 sm:p-4 flex justify-between items-center border-b border-gray-200 shadow-sm sticky top-0 z-40">
@@ -121,10 +121,12 @@ const DashboardHeader = ({ onMenuClick }) => {
           title="Notifications"
         >
           <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 sm:h-5 sm:w-5 bg-pink-500 text-white text-[9px] sm:text-xs items-center justify-center font-bold">3</span>
-          </span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 sm:h-5 sm:w-5 bg-pink-500 text-white text-[9px] sm:text-xs items-center justify-center font-bold">{unreadCount}</span>
+            </span>
+          )}
         </Link>
         
         <div className="h-6 sm:h-8 w-px bg-gray-300 hidden sm:block"></div>

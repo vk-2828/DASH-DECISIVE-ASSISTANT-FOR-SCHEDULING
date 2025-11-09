@@ -50,6 +50,10 @@ const taskSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false,
+    },
+    twoHourReminderSent: {
+        type: Boolean,
+        default: false,
     }
 }, {
     timestamps: true,

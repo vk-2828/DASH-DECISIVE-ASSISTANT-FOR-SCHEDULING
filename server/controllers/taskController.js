@@ -37,23 +37,10 @@ exports.createTask = async (req, res) => {
     const { title, description, priority, dueDate, isStarred, alarms } = req.body;
     try {
         const task = await Task.create({ user: req.user.id, title, description, priority, dueDate, isStarred, alarms });
-        const user = await User.findById(req.user.id);
-        if (user) {
-            let detailsHtml = '';
-            const dateTimeOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' };
-            if (task.dueDate) {
-                const deadline = new Date(task.dueDate).toLocaleString('en-US', dateTimeOptions);
-                detailsHtml += `<br><b>🎯 Deadline:</b> ${deadline}`;
-            }
-            if (task.alarms && task.alarms.length > 0) {
-                const nextAlarmTime = new Date(Math.min(...task.alarms.map(alarm => new Date(alarm.time))));
-                const alarmTime = nextAlarmTime.toLocaleString('en-US', dateTimeOptions);
-                detailsHtml += `<br><b>⏰ First Reminder:</b> ${alarmTime}`;
-            }
-            const emailSubject = `🚀 New Quest Added: ${title}`;
-            const emailBody = `Hi ${user.name},<br><br>A new challenge, "<strong>${title}</strong>," has been added to your DASH list. Here are the details:${detailsHtml}<br><br>You've got this!`;
-            await sendEmail(user.email, emailSubject, emailBody);
-        }
+        
+        // No email sent on task creation - only for reminders
+        console.log(`Task "${title}" created successfully for user ${req.user.id}`);
+        
         res.status(201).json(task);
     } catch (error) {
         console.error("Task Creation Error:", error);

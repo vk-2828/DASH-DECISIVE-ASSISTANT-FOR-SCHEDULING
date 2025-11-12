@@ -54,7 +54,21 @@ const taskSchema = new mongoose.Schema({
     twoHourReminderSent: {
         type: Boolean,
         default: false,
-    }
+    },
+    reminders: [
+      {
+        time: { type: Date },
+        daily: { type: Boolean, default: false },
+        repeatType: { 
+          type: String, 
+          enum: ['once', 'daily', 'monthly', 'yearly'],
+          default: 'once'
+        },
+        monthlyDay: { type: Number, min: 1, max: 31 },
+        yearlyMonth: { type: Number, min: 1, max: 12 },
+        yearlyDay: { type: Number, min: 1, max: 31 },
+      },
+    ]
 }, {
     timestamps: true,
 });

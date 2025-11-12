@@ -280,6 +280,58 @@ const send2HourReminders = async () => {
     }
 };
 
+// --- Helper Function 6: Check and Reschedule Reminders ---
+const checkReminders = async () => {
+  try {
+    const now = new Date();
+    
+    const tasks = await Task.find({
+      isCompleted: false,
+      isTrashed: false,
+      'reminders.0': { $exists: true },
+    });
+
+    for (const task of tasks) {
+      for (const reminder of task.reminders) {
+        const reminderTime = new Date(reminder.time);
+        const timeDiff = now - reminderTime;
+
+        // Check if it's time for the reminder (within 1 minute window)
+        if (timeDiff >= 0 && timeDiff < 60000) {
+          await sendReminderEmail(task);
+
+          // Handle different repeat types
+          if (reminder.repeatType === 'daily' || reminder.daily) {
+            // Set next day's reminder
+            const nextReminder = new Date(reminderTime);
+            nextReminder.setDate(nextReminder.getDate() + 1);
+            reminder.time = nextReminder;
+          } else if (reminder.repeatType === 'monthly') {
+            // Set next month's reminder
+            const nextReminder = new Date(reminderTime);
+            nextReminder.setMonth(nextReminder.getMonth() + 1);
+            nextReminder.setDate(reminder.monthlyDay || 1);
+            reminder.time = nextReminder;
+          } else if (reminder.repeatType === 'yearly') {
+            // Set next year's reminder
+            const nextReminder = new Date(reminderTime);
+            nextReminder.setFullYear(nextReminder.getFullYear() + 1);
+            nextReminder.setMonth((reminder.yearlyMonth || 1) - 1);
+            nextReminder.setDate(reminder.yearlyDay || 1);
+            reminder.time = nextReminder;
+          } else {
+            // One-time reminder - remove it
+            task.reminders = task.reminders.filter(r => r._id.toString() !== reminder._id.toString());
+          }
+          
+          await task.save();
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error checking reminders:', error);
+  }
+};
 
 // --- Main Service Starter ---
 const startReminderService = () => {

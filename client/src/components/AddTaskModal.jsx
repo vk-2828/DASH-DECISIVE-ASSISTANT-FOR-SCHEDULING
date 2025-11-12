@@ -36,14 +36,25 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }) => {
         }
     }
 
+    // IMPORTANT: Convert local datetime (from <input type="datetime-local" />)
+    // into a UTC ISO string before sending to the API. Otherwise, the server
+    // will assume the value is UTC and apply an extra +offset when read back.
+    const finalDueDateISO = finalDueDate ? new Date(finalDueDate).toISOString() : null;
+
+    // Normalize alarm times as well (same reason as above)
+    const normalizedAlarms = alarms.map(a => ({
+      ...a,
+      time: a.time ? new Date(a.time).toISOString() : null,
+    })).filter(a => a.time); // drop empty times if any
+
     setLoading(true);
     try {
       await onAddTask({
         title,
         description,
         priority: Number(priority),
-        dueDate: finalDueDate,
-        alarms,
+        dueDate: finalDueDateISO,
+        alarms: normalizedAlarms,
       });
       onClose(); // Close the modal on success
     } catch (err) {

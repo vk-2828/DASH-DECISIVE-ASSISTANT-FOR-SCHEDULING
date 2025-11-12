@@ -43,16 +43,23 @@ const EditTaskModal = ({ task, isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let finalDueDate = null;
-    if (formData.dueDate) {
-        if (formData.dueDate.length === 10) {
-            finalDueDate = `${formData.dueDate}T23:59`;
-        } else {
-            finalDueDate = formData.dueDate;
-        }
+  let finalDueDate = null;
+  if (formData.dueDate) {
+    if (formData.dueDate.length === 10) {
+      finalDueDate = `${formData.dueDate}T23:59`;
+    } else {
+      finalDueDate = formData.dueDate;
     }
+  }
+
+  // Convert local datetime strings to UTC ISO before updating
+  const finalDueDateISO = finalDueDate ? new Date(finalDueDate).toISOString() : null;
+  const normalizedAlarms = (formData.alarms || []).map(a => ({
+    ...a,
+    time: a.time ? new Date(a.time).toISOString() : null,
+  })).filter(a => a.time);
     setLoading(true);
-    await updateTask(task._id, { ...formData, priority: Number(formData.priority), dueDate: finalDueDate });
+    await updateTask(task._id, { ...formData, priority: Number(formData.priority), dueDate: finalDueDateISO, alarms: normalizedAlarms });
     setLoading(false);
     onClose();
   };
